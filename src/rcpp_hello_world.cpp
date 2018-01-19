@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include <Rcpp.h>
 using namespace Rcpp;
 
@@ -84,6 +85,63 @@ int WriteFormat2_2(const std::string &basefilename, const unsigned short *p1, co
     outfile.write((char *)c1, numSubjects * sizeof(unsigned short));
     outfile.write((char *)c2, numSubjects * sizeof(unsigned short));
   }
+  
+  outfile.close();
+  return 0;
+}
+
+int WriteFormat3_1(const std::string &basefilename, const unsigned short *dosage, unsigned int numSubjects, unsigned int numSNPs) {
+  std::string filename;
+  std::ofstream outfile;
+  const char header[8] = {'b', 'o', 's', 'e', 0x0, 0x3, 0x0, 0x1};
+  
+  filename = basefilename + "_3_1.bdosage";
+  outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::binary);
+  if (!outfile.good()) {
+    Rcpp::Rcerr << "Unable to open output file" << std::endl;
+    return 1;
+  }
+  outfile.write(header, 8);
+  outfile.write((const char *)&numSubjects, sizeof(unsigned int));
+  outfile.write((char *)dosage, numSubjects * numSNPs * sizeof(unsigned short));
+  
+  outfile.close();
+  return 0;
+}
+
+int WriteFormat3_2(const std::string &basefilename, const unsigned short *dosage, const unsigned short *p0, const unsigned short *p1, const unsigned short *p2, unsigned int numSubjects, unsigned int numSNPs) {
+  std::string filename;
+  std::ofstream outfile;
+  const char header[8] = {'b', 'o', 's', 'e', 0x0, 0x3, 0x0, 0x2};
+  std::vector<unsigned short> z;
+  const unsigned short *pD, *pP0, *pP1, *pP2;
+  unsigned short *pa;
+  int numAdded;
+  unsigned int ui, uj;
+  
+  filename = basefilename + "_3_2.bdosage";
+  outfile.open(filename.c_str(), std::ios_base::out | std::ios_base::binary);
+  if (!outfile.good()) {
+    Rcpp::Rcerr << "Unable to open output file" << std::endl;
+    return 1;
+  }
+  z.resize(4 * numSubjects);
+  
+  outfile.write(header, 8);
+  outfile.write((const char *)&numSubjects, sizeof(unsigned int));
+  pD = dosage;
+  pP0 = p0;
+  pP1 = p1;
+  pP2 = p2;
+  for (ui = 0; ui < numSNPs; ++ui, pD += numSubjects, pP0 += numSubjects, pP1 += numSubjects, pP2 += numSubjects) {
+    std::memmove((char *)&z[0], (char *)pD, numSubjects * sizeof(unsigned short));
+    pa = &z[numSubjects];
+    numAdded = 0;
+    for (uj = 0; uj < numSubjects; ++uj) {
+      ++pa; // Not correct this is where I left off.
+    }
+  }
+  outfile.write((char *)dosage, numSubjects * numSNPs * sizeof(unsigned short));
   
   outfile.close();
   return 0;
