@@ -5,3 +5,7 @@ rcpp_hello_world <- function() {
     .Call(`_POCBinaryDosageCOH_rcpp_hello_world`)
 }
 
+WriteBinaryDosage <- function(x, numSubjects, numSNPs) {
+    .Call(`_POCBinaryDosageCOH_WriteBinaryDosage`, x, numSubjects, numSNPs)
+}
+
