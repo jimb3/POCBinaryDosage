@@ -16,22 +16,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // WriteBinaryDosage
-int WriteBinaryDosage(const Rcpp::NumericMatrix& x, const int numSubjects, const int numSNPs);
-RcppExport SEXP _POCBinaryDosageCOH_WriteBinaryDosage(SEXP xSEXP, SEXP numSubjectsSEXP, SEXP numSNPsSEXP) {
+int WriteBinaryDosage(const Rcpp::NumericMatrix& x, const int numSubjects, const int numSNPs, const std::string& filename);
+RcppExport SEXP _POCBinaryDosageCOH_WriteBinaryDosage(SEXP xSEXP, SEXP numSubjectsSEXP, SEXP numSNPsSEXP, SEXP filenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const int >::type numSubjects(numSubjectsSEXP);
     Rcpp::traits::input_parameter< const int >::type numSNPs(numSNPsSEXP);
-    rcpp_result_gen = Rcpp::wrap(WriteBinaryDosage(x, numSubjects, numSNPs));
+    Rcpp::traits::input_parameter< const std::string& >::type filename(filenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(WriteBinaryDosage(x, numSubjects, numSNPs, filename));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_POCBinaryDosageCOH_rcpp_hello_world", (DL_FUNC) &_POCBinaryDosageCOH_rcpp_hello_world, 0},
-    {"_POCBinaryDosageCOH_WriteBinaryDosage", (DL_FUNC) &_POCBinaryDosageCOH_WriteBinaryDosage, 3},
+    {"_POCBinaryDosageCOH_WriteBinaryDosage", (DL_FUNC) &_POCBinaryDosageCOH_WriteBinaryDosage, 4},
     {NULL, NULL, 0}
 };
 
