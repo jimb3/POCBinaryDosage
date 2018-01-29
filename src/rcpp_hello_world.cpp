@@ -117,6 +117,7 @@ int WriteFormat3_2(const std::string &basefilename, const unsigned short *dosage
   const unsigned short *pD, *pP0, *pP1, *pP2;
   unsigned short *pa;
   int numAdded;
+  int snpSize;
   unsigned int ui, uj;
   
   filename = basefilename + "_3_2.bdosage";
@@ -138,10 +139,27 @@ int WriteFormat3_2(const std::string &basefilename, const unsigned short *dosage
     pa = &z[numSubjects];
     numAdded = 0;
     for (uj = 0; uj < numSubjects; ++uj) {
-      ++pa; // Not correct this is where I left off.
+      if (pP0[uj] + pP1[uj] + pP2[uj] != 10000 || (pP0[uj] != 0 && pP2[uj] != 0)) {
+        z[uj] |= 0x8000;
+        pa[numAdded] = 0x8000 | pP1[uj];
+        ++numAdded;
+        pa[numAdded] = pP0[uj];
+        ++numAdded;
+        pa[numAdded] = pP2[uj];
+        ++numAdded;
+      } else if (pP1[uj] + pP2[uj] + pP2[uj] != z[uj]) {
+        z[uj] |= 0x8000;
+        pa[numAdded] = pP1[uj];
+        ++numAdded;
+      }
     }
+    numAdded += numSubjects;
+    snpSize = numAdded + numAdded;
+    Rcpp::Rcout << snpSize << std::endl;
+    outfile.write((char *)&snpSize, sizeof(int));
+    outfile.write((char *)&z[0], numAdded * sizeof(short));
   }
-  outfile.write((char *)dosage, numSubjects * numSNPs * sizeof(unsigned short));
+  Rcpp::Rcout << outfile.tellp() << std::endl;
   
   outfile.close();
   return 0;
@@ -165,9 +183,8 @@ int WriteBinaryDosage(const Rcpp::NumericMatrix &x, const int numSubjects, const
   unsigned short *p0, *p1, *p2, *dosage;
   unsigned short *p0D, *p1D, *p2D, *dosageD;
   unsigned short z0, z1;
-  unsigned ui;
+  int i;
 
-  Rcpp::Rcout << filename << std::endl;  
   if (numSubjects * numSNPs != x.nrow()) {
     Rcpp::Rcerr << "Number of rows inconsist with number of subjects and SNPs" << std::endl;
     return 1;
@@ -175,38 +192,31 @@ int WriteBinaryDosage(const Rcpp::NumericMatrix &x, const int numSubjects, const
   y = &x[0];
   z.resize(numSubjects * numSNPs * 4);
   zD.resize(numSubjects * numSNPs * 4);
-  for (ui = 0; ui < numSubjects * numSNPs * 4; ++ui) {
-    z0 = (unsigned short)(y[ui] * 0xfffe);
+  for (i = 0; i < numSubjects * numSNPs * 4; ++i) {
+    z0 = (unsigned short)(y[i] * 0xfffe);
     z1 = z0 + 1;
-    if (ui == 0 || ui == numSubjects * numSNPs) {
-      Rcpp::Rcout << y[ui] << '\t' << z0 << '\t' << z1 << std::endl;
-      Rcpp::Rcout << y[ui] - (double)(z0) / 0xfffe << '\t' << (double)(z1) / 0xfffe - y[ui] << std::endl;
-    }
-    if (y[ui] - (double)(z0 * 0xfffe) > (double)(z1 * 0xfffe) - y[ui])
-      z[ui] = z1;
+    if (y[i] - (double)(z0 * 0xfffe) > (double)(z1 * 0xfffe) - y[i])
+      z[i] = z1;
     else
-      z[ui] = z0;
-    zD[ui] = (unsigned short)(y[ui] * 20000);
+      z[i] = z0;
+    zD[i] = (unsigned short)(y[i] * 10000);
   }
   p0 = &z[0];
   p1 = p0 + numSubjects * numSNPs;
   p2 = p1 + numSubjects * numSNPs;
   dosage = p2 + numSubjects * numSNPs;
   
-  Rcpp::Rcout << *p0 << '\t' << *p1 << '\t' << *p2 << '\t' << *dosage << std::endl;
-  Rcpp::Rcout << '\n' << zD.size() << std::endl;
-
   p0D = &zD[0];
   p1D = p0D + numSubjects * numSNPs;
   p2D = p1D + numSubjects * numSNPs;
   dosageD = p2D + numSubjects * numSNPs;
 
-  Rcpp::Rcout << *p0D << '\t' << *p1D << '\t' << *p2D << '\t' << *dosageD << std::endl;
-  
   WriteFormat1_1(filename, dosage, numSubjects, numSNPs);
   WriteFormat1_2(filename, p1, p2, numSubjects, numSNPs);
   WriteFormat2_1(filename, dosageD, numSubjects, numSNPs);
   WriteFormat2_2(filename, p1D, p2D, numSubjects, numSNPs);
+  WriteFormat3_1(filename, dosageD, numSubjects, numSNPs);
+  WriteFormat3_2(filename, dosageD, p0D, p1D, p2D, numSubjects, numSNPs);
   
   return 0;
 }

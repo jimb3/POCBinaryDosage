@@ -22,3 +22,10 @@ colnames(locations) <- c("SNP", "BP")
 allData <- dplyr::inner_join(locations, dosage)
 allData <- dplyr::arrange(allData, BP, Order)
 x <- as.matrix(allData[,5:8])
+fam <- subjects[,c(2,1)]
+colnames(fam) <- c("FID", "IID")
+fam$PID = 0
+fam$MID = 0
+fam$Sex = 0
+fam$Phenoytpe = 0
+write.table(fam, "subset10.fam", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = '\t')

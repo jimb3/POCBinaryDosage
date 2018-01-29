@@ -5,6 +5,19 @@
 
 using namespace Rcpp;
 
+// GetBinaryDosageFormat
+Rcpp::List GetBinaryDosageFormat(const std::string& binaryDosageFilename, const unsigned int nSub, const unsigned int nSNPs);
+RcppExport SEXP _POCBinaryDosageCOH_GetBinaryDosageFormat(SEXP binaryDosageFilenameSEXP, SEXP nSubSEXP, SEXP nSNPsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type binaryDosageFilename(binaryDosageFilenameSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nSub(nSubSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nSNPs(nSNPsSEXP);
+    rcpp_result_gen = Rcpp::wrap(GetBinaryDosageFormat(binaryDosageFilename, nSub, nSNPs));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _POCBinaryDosageCOH_rcpp_hello_world() {
@@ -31,6 +44,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_POCBinaryDosageCOH_GetBinaryDosageFormat", (DL_FUNC) &_POCBinaryDosageCOH_GetBinaryDosageFormat, 3},
     {"_POCBinaryDosageCOH_rcpp_hello_world", (DL_FUNC) &_POCBinaryDosageCOH_rcpp_hello_world, 0},
     {"_POCBinaryDosageCOH_WriteBinaryDosage", (DL_FUNC) &_POCBinaryDosageCOH_WriteBinaryDosage, 4},
     {NULL, NULL, 0}
